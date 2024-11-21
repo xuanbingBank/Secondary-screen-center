@@ -8,15 +8,14 @@ const router = createRouter({
   routes: routeMap
 });
 
-// 在路由跳转之前执行，可以用于进行全局的访问控制或重定向跳转等操作
+// 添加路由守卫
 router.beforeEach((to, from, next) => {
-  // ...
-  // 继续执行下一个路由守卫
-  next();
-});
-
-// 在路由跳转完成后执行，可以用于对页面进行一些操作，如监测页面埋点等
-router.afterEach((to, from) => {
+  // 如果路由不存在，重定向到默认路由
+  if (!to.name) {
+    next({ path: '/feature/download' });
+  } else {
+    next();
+  }
 });
 
 export default router;

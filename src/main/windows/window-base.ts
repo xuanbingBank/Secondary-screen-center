@@ -9,6 +9,10 @@ abstract class WindowBase{
     this._browserWindow = new BrowserWindow(options);
 
     if(this._browserWindow){
+      // 在开发环境下自动打开开发者工具
+      if(!app.isPackaged)
+        this._browserWindow.webContents.openDevTools();
+
       // After received closed event, remove the reference to the window and avoid using it any more.
       this._browserWindow.on("closed", () => {
         this._browserWindow = null;
