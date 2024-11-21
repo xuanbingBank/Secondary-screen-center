@@ -7,49 +7,24 @@
     :trigger="null"
     collapsible
   >
-    <!-- Logo区域 -->
     <div class="logo">
       <img src="/electron.svg" alt="logo" />
     </div>
-    <!-- 主要菜单容器 -->
-    <div class="primary-menu-container">
-      <!-- 主要功能菜单 -->
-      <a-menu 
-        theme="dark" 
-        mode="inline" 
-        v-model:selectedKeys="primarySelectedKeys"
-        @select="handlePrimarySelect"
+    <a-menu 
+      theme="dark" 
+      mode="inline" 
+      v-model:selectedKeys="primarySelectedKeys"
+      @select="handlePrimarySelect"
+    >
+      <a-menu-item 
+        v-for="route in primaryMenuItems" 
+        :key="String(route.name)"
       >
-        <!-- 遍历生成主要菜单项 -->
-        <a-menu-item 
-          v-for="route in mainMenuItems" 
-          :key="String(route.name)"
-        >
-          <template #icon>
-            <component :is="route.meta?.icon" />
-          </template>
-        </a-menu-item>
-      </a-menu>
-
-      <!-- 设置类菜单（底部） -->
-      <a-menu 
-        theme="dark" 
-        mode="inline" 
-        class="setting-menu"
-        v-model:selectedKeys="primarySelectedKeys"
-        @select="handlePrimarySelect"
-      >
-        <!-- 遍历生成设置菜单项 -->
-        <a-menu-item 
-          v-for="route in settingMenuItems" 
-          :key="String(route.name)"
-        >
-          <template #icon>
-            <component :is="route.meta?.icon" />
-          </template>
-        </a-menu-item>
-      </a-menu>
-    </div>
+        <template #icon>
+          <component :is="route.meta?.icon" />
+        </template>
+      </a-menu-item>
+    </a-menu>
   </a-layout-sider>
 
   <!-- 右侧二级菜单栏 -->
@@ -59,7 +34,6 @@
     :trigger="null"
     collapsible
   >
-    <!-- 菜单内容区域 -->
     <div class="menu-wrapper">
       <a-menu
         v-model:selectedKeys="selectedKeys"
@@ -67,108 +41,71 @@
         mode="inline"
         @select="handleMenuSelect"
       >
-        <!-- 二级菜单列表 -->
-        <template v-if="currentSubMenus.length">
-          <template v-for="item in currentSubMenus" :key="String(item.name)">
-            <!-- 有子菜单的菜单项 -->
-            <a-sub-menu 
-              v-if="item.children?.length" 
-              :key="String(item.name)"
-            >
-              <template #icon>
-                <component :is="item.meta?.icon" />
-              </template>
-              <template #title>{{ item.meta?.title }}</template>
-              <!-- 子菜单项列表 -->
-              <a-menu-item 
-                v-for="child in item.children"
-                :key="String(child.name)"
-              >
-                {{ child.meta?.title }}
-              </a-menu-item>
-            </a-sub-menu>
-            <!-- 无子菜单的菜单项 -->
+        <template v-for="item in currentSubMenus" :key="String(item.name)">
+          <!-- 有子菜单的菜单项 -->
+          <a-sub-menu 
+            v-if="item.children?.length" 
+            :key="String(item.name)"
+            :popupClassName="collapsed ? 'persistent-submenu' : ''"
+          >
+            <template #icon>
+              <component :is="item.meta?.icon" />
+            </template>
+            <template #title>{{ item.meta?.title }}</template>
             <a-menu-item 
-              v-else 
-              :key="`${String(item.name)}`"
+              v-for="child in item.children"
+              :key="String(child.name)"
             >
-              <template #icon>
-                <component :is="item.meta?.icon" />
-              </template>
-              <span>{{ item.meta?.title }}</span>
+              {{ child.meta?.title }}
             </a-menu-item>
-          </template>
+          </a-sub-menu>
+          <!-- 无子菜单的菜单项 -->
+          <a-menu-item 
+            v-else 
+            :key="String(item.name)"
+          >
+            <template #icon>
+              <component :is="item.meta?.icon" />
+            </template>
+            <span>{{ item.meta?.title }}</span>
+          </a-menu-item>
         </template>
       </a-menu>
     </div>
 
-    <!-- 中间折叠按钮 -->
+    <!-- 折叠按钮 -->
     <div class="collapse-trigger">
       <menu-unfold-outlined
         v-if="collapsed"
         class="trigger-icon"
-        @click="() => (collapsed = !collapsed)"
+        @click="handleCollapse"
       />
       <menu-fold-outlined
         v-else
         class="trigger-icon"
-        @click="() => (collapsed = !collapsed)"
+        @click="handleCollapse"
       />
-    </div>
-
-    <!-- 底部折叠按钮 -->
-    <div class="bottom-trigger">
-      <a-button 
-        type="text"
-        block
-        @click="() => (collapsed = !collapsed)"
-      >
-        <template #icon>
-          <component :is="collapsed ? MenuUnfoldOutlined : MenuFoldOutlined" />
-        </template>
-        <span>{{ collapsed ? '展开' : '收起' }}</span>
-      </a-button>
     </div>
   </a-layout-sider>
 </template>
 
 <script setup lang="ts">
-// 导入所需的组件和工具
-import { ref, computed } from 'vue';
-import { useRouter, useRoute } from 'vue-router';
+import { ref, computed, onMounted } from 'vue';
+import { useRoute } from 'vue-router';
 import type { MenuProps } from 'ant-design-vue';
 import routeMap from '../../router/router-map';
 import {
-  MenuUnfoldOutlined,
   MenuFoldOutlined,
+  MenuUnfoldOutlined,
 } from '@ant-design/icons-vue';
 
-// 获取路由实例
-const router = useRouter();
 const route = useRoute();
+const collapsed = ref(false);
+const primarySelectedKeys = ref<string[]>(['feature']);
+const selectedKeys = ref<string[]>([]);
+const openKeys = ref<string[]>([]);
 
-// 菜单状态管理
-const collapsed = ref(false);                        // 二级菜单折叠状态
-const primarySelectedKeys = ref<string[]>(['home']); // 一级菜单选中项
-const selectedKeys = ref<string[]>([]);              // 二级菜单选中项
-const openKeys = ref<string[]>([]);                  // 展开的子菜单
-
-// 定义组件事件
-const emit = defineEmits<{
-  (e: 'menu-select', routeName: string): void;      // 菜单选择事件
-}>();
-
-// 计算主要菜单项（非设置类）
-const mainMenuItems = computed(() => {
-  return routeMap.filter(route => route.meta?.primary && !route.meta?.isSettings);
-});
-
-// 计算设置菜单项
-const settingMenuItems = computed(() => {
-  return routeMap.filter(route => route.meta?.primary && route.meta?.isSettings);
-});
-
-// 计算一级菜单项（所有）
+// 计算一级菜单项
 const primaryMenuItems = computed(() => {
   return routeMap.filter(route => route.meta?.primary);
 });
@@ -176,56 +113,50 @@ const primaryMenuItems = computed(() => {
 // 计算当前二级菜单项
 const currentSubMenus = computed(() => {
   const currentPrimaryRoute = routeMap.find(r => r.name === primarySelectedKeys.value[0]);
-  if (!currentPrimaryRoute) return [];
-  return currentPrimaryRoute.children || [currentPrimaryRoute];
+  return currentPrimaryRoute?.children || [];
 });
 
 // 处理一级菜单选择
 const handlePrimarySelect: MenuProps['onSelect'] = (info) => {
   const route = routeMap.find(r => r.name === info.key.toString());
   if (route) {
-    // 更新一级菜单选中状态
     primarySelectedKeys.value = [route.name as string];
-    // 清空二级菜单选中状态
-    selectedKeys.value = [];
-    // 如果有子菜单，展开它
-    if (route.children?.length) {
-      openKeys.value = [route.name as string];
-    }
   }
 };
 
-// 处理二级菜单选择
-const handleMenuSelect: MenuProps['onSelect'] = (info) => {
-  // 触发路由跳转事件
-  emit('menu-select', info.key.toString());
+// 处理菜单选择
+const handleMenuSelect = (info: { key: string | number }) => {
+  emit('menu-select', String(info.key));
 };
 
-// 初始化菜单选中状态
+// 处理折叠按钮点击
+const handleCollapse = () => {
+  collapsed.value = !collapsed.value;
+};
+
+// 初始化选中状态
 const initSelectedKeys = () => {
   const matched = route.matched;
   if (matched.length) {
-    // 设置一级菜单选中状态
     const primaryRoute = matched[0];
     primarySelectedKeys.value = [primaryRoute.name as string];
     
-    // 只有当前路由匹配时才设置二级菜单选中状态
     if (matched.length > 1) {
       selectedKeys.value = [matched[matched.length - 1].name as string];
       openKeys.value = [matched[1].name as string];
-    } else {
-      selectedKeys.value = [];
     }
   }
 };
 
-// 监听路由变化，更新菜单状态
-router.afterEach(() => {
-  initSelectedKeys();
-});
+// 定义事件
+const emit = defineEmits<{
+  (e: 'menu-select', key: string): void;
+}>();
 
 // 初始化
-initSelectedKeys();
+onMounted(() => {
+  initSelectedKeys();
+});
 </script>
 
 <style scoped>
