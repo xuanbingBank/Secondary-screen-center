@@ -10,7 +10,6 @@
       @minimize="$emit('minimize')"
       @exit="$emit('exit')"
       @fullscreen="toggleFullscreen"
-      @go-home="goHome"
     />
 
     <a-layout-content :class="['content', { 'content-fullscreen': isFullscreen }]">
@@ -68,12 +67,6 @@ const handleTabChange = (path: string) => {
 // 处理标签页关闭
 const handleTabRemove = (path: string) => {
   const targetIndex = removeTab(path);
-  
-  // 如果关闭的是当前标签，且没有其他标签了，才返回首页
-  if (path === route.path && visitedTabs.value.length === 0) {
-    goHome();
-  }
-  // 移除自动跳转到其他标签的逻辑
 };
 
 // 全屏状态
@@ -84,20 +77,6 @@ const toggleFullscreen = () => {
   isFullscreen.value = !isFullscreen.value;
 };
 
-// 返回首页
-const goHome = () => {
-  // 添加首页标签
-  addTab({
-    name: 'home',
-    path: '/home',
-    meta: { 
-      title: '首页',
-      closable: false
-    }
-  });
-  // 跳转到首页
-  router.push('/home');
-};
 
 defineEmits(['minimize', 'exit']);
 </script>

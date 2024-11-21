@@ -107,12 +107,28 @@ const onTabChange: TabsProps['onChange'] = (key: Key) => {
 // 标签页编辑（关闭）
 const onTabEdit: TabsProps['onEdit'] = (targetKey, action) => {
   if (action === 'remove' && targetKey !== undefined) {
-    // 如果当前只剩一个标签页且要关闭它，则触发返回首页
-    if (props.tabs.length === 1) {
-      emit('go-home');
-    } else {
-      emit('tab-remove', targetKey.toString());
+    const currentKey = targetKey.toString();
+    // 找到当前要关闭的标签的索引
+    const targetIndex = props.tabs.findIndex(tab => tab.path === currentKey);
+    
+    // 如果关闭的是当前激活的标签，需要切换到左边的标签
+    if (currentKey === props.activeTab) {
+      // 如果还有其他标签
+      if (props.tabs.length > 1) {
+        // 如果关闭的是第一个标签，切换到新的第一个标签
+        // 否则切换到左边的标签
+        const newActiveKey = targetIndex === 0 
+          ? props.tabs[1].path 
+          : props.tabs[targetIndex - 1].path;
+        emit('tab-change', newActiveKey);
+      } else {
+        // 如果是最后一个标签，触发返回首页
+        emit('go-home');
+      }
     }
+    
+    // 触发移除标签事件
+    emit('tab-remove', currentKey);
   }
 };
 </script>
