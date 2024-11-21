@@ -149,7 +149,7 @@ const route = useRoute();
 
 // 菜单状态管理
 const collapsed = ref(false);                        // 二级菜单折叠状态
-const primarySelectedKeys = ref<string[]>(['feature']); // 一级菜单选中项
+const primarySelectedKeys = ref<string[]>(['home']); // 一级菜单选中项
 const selectedKeys = ref<string[]>([]);              // 二级菜单选中项
 const openKeys = ref<string[]>([]);                  // 展开的子菜单
 
@@ -186,9 +186,10 @@ const handlePrimarySelect: MenuProps['onSelect'] = (info) => {
   if (route) {
     // 更新一级菜单选中状态
     primarySelectedKeys.value = [route.name as string];
-    // 如果有子菜单，设置第一个子菜单为选中状态
+    // 清空二级菜单选中状态
+    selectedKeys.value = [];
+    // 如果有子菜单，展开它
     if (route.children?.length) {
-      selectedKeys.value = [route.children[0].name as string];
       openKeys.value = [route.name as string];
     }
   }
@@ -207,12 +208,13 @@ const initSelectedKeys = () => {
     // 设置一级菜单选中状态
     const primaryRoute = matched[0];
     primarySelectedKeys.value = [primaryRoute.name as string];
-    // 设置二级菜单选中状态
-    selectedKeys.value = [matched[matched.length - 1].name as string];
     
-    // 设置子菜单展开状态
+    // 只有当前路由匹配时才设置二级菜单选中状态
     if (matched.length > 1) {
+      selectedKeys.value = [matched[matched.length - 1].name as string];
       openKeys.value = [matched[1].name as string];
+    } else {
+      selectedKeys.value = [];
     }
   }
 };
