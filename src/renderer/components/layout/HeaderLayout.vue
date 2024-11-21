@@ -55,7 +55,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed } from 'vue';
+import { computed, watch } from 'vue';
 import { 
   MinusOutlined, 
   PoweroffOutlined,
@@ -80,12 +80,24 @@ const emit = defineEmits<{
   (e: 'fullscreen'): void;
   (e: 'tab-change', path: string): void;
   (e: 'tab-remove', path: string): void;
+  (e: 'go-home'): void;
 }>();
 
 const activeKey = computed({
   get: () => props.activeTab,
   set: (value: Key) => emit('tab-change', value.toString())
 });
+
+// 监听标签页数量
+watch(
+  () => props.tabs.length,
+  (newLength) => {
+    // 当标签页数量为0时，触发返回首页事件
+    if (newLength === 0) {
+      emit('go-home');
+    }
+  }
+);
 
 // 标签页切换
 const onTabChange: TabsProps['onChange'] = (key: Key) => {
@@ -95,8 +107,12 @@ const onTabChange: TabsProps['onChange'] = (key: Key) => {
 // 标签页编辑（关闭）
 const onTabEdit: TabsProps['onEdit'] = (targetKey, action) => {
   if (action === 'remove' && targetKey !== undefined) {
-    // 确保 targetKey 转换为字符串
-    emit('tab-remove', targetKey.toString());
+    // 如果当前只剩一个标签页且要关闭它，则触发返回首页
+    if (props.tabs.length === 1) {
+      emit('go-home');
+    } else {
+      emit('tab-remove', targetKey.toString());
+    }
   }
 };
 </script>
