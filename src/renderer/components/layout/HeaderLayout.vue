@@ -1,11 +1,11 @@
 <template>
   <div class="header-container">
     <!-- 顶部标题栏 -->
-    <a-layout-header class="header">
-      <div class="header-left">
+    <a-layout-header class="header" app-region="drag">
+      <div class="header-left" app-region="drag">
         <h2>{{ title }}</h2>
       </div>
-      <div class="header-right">
+      <div class="header-right" app-region="no-drag">
         <a-space>
           <a-button type="text" @click="$emit('minimize')">
             <template #icon><minus-outlined /></template>
@@ -18,7 +18,7 @@
     </a-layout-header>
 
     <!-- 标签页 -->
-    <div class="tabs-container">
+    <div class="tabs-container" app-region="no-drag">
       <div class="tabs-wrapper">
         <a-tabs
           v-model:activeKey="activeKey"
@@ -136,6 +136,7 @@ const onTabEdit: TabsProps['onEdit'] = (targetKey, action) => {
 <style scoped>
 .header-container {
   background: #fff;
+  -webkit-app-region: drag;
 }
 
 .header {
@@ -147,6 +148,7 @@ const onTabEdit: TabsProps['onEdit'] = (targetKey, action) => {
   align-items: center;
   background: #fff;
   border-bottom: 1px solid #f0f0f0;
+  -webkit-app-region: drag;
 }
 
 .header-left h2 {
@@ -161,6 +163,7 @@ const onTabEdit: TabsProps['onEdit'] = (targetKey, action) => {
   background: #fff;
   height: 34px;
   border-bottom: 1px solid #f0f0f0;
+  -webkit-app-region: no-drag;
 }
 
 .tabs-wrapper {
@@ -226,5 +229,12 @@ const onTabEdit: TabsProps['onEdit'] = (targetKey, action) => {
 :deep(.content-fullscreen) .header,
 :deep(.content-fullscreen) .tabs-container {
   display: none;
+}
+
+/* 确保按钮和交互区域不可拖动 */
+:deep(.ant-btn),
+:deep(.ant-tabs-tab),
+.tabs-extra {
+  -webkit-app-region: no-drag;
 }
 </style> 

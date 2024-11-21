@@ -6,12 +6,37 @@ import { app, BrowserWindow, IpcMainEvent, IpcMainInvokeEvent, BrowserWindowCons
  */
 abstract class WindowBase{
   constructor(options?: BrowserWindowConstructorOptions){
-    this._browserWindow = new BrowserWindow(options);
+    const defaultOptions: BrowserWindowConstructorOptions = {
+      frame: false, // 无边框
+      webPreferences: {
+        nodeIntegration: true,
+        contextIsolation: false,
+        webSecurity: false, // 允许跨域
+        allowRunningInsecureContent: true // 允许运行不安全内容
+      }
+    };
+
+    // 合并默认选项和传入的选项
+    const mergedOptions = { ...defaultOptions, ...options };
+    
+    this._browserWindow = new BrowserWindow(mergedOptions);
 
     if(this._browserWindow){
       // 在开发环境下自动打开开发者工具
       if(!app.isPackaged)
         this._browserWindow.webContents.openDevTools();
+
+      // 设置内容安全策略
+      this._browserWindow.webContents.session.webRequest.onHeadersReceived(
+        (details, callback) => {
+          callback({
+            responseHeaders: {
+              ...details.responseHeaders,
+              'Content-Security-Policy': ["default-src 'self' 'unsafe-inline' 'unsafe-eval' https: data: ws:"]
+            }
+          });
+        }
+      );
 
       // After received closed event, remove the reference to the window and avoid using it any more.
       this._browserWindow.on("closed", () => {
