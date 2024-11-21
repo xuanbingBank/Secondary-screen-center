@@ -1,154 +1,20 @@
 import { RouteRecordRaw } from "vue-router";
-import {
-  HomeOutlined,
-  AppstoreOutlined,
-  SettingOutlined,
-  ExperimentOutlined,
-  DownloadOutlined,
-  GlobalOutlined,
-  FileSearchOutlined,
-  BugOutlined,
-  AppstoreAddOutlined,
-  ControlOutlined,
-  DashboardOutlined,
-  ToolOutlined
-} from '@ant-design/icons-vue';
-import { tourStepInfo } from "ant-design-vue/es/vc-tour";
+import { homeRoute } from './modules/home';
+import { featureRoute } from './modules/feature';
+import { examplesRoute } from './modules/examples';
+import { toolsRoute } from './modules/tools';
+import { settingRoute } from './modules/setting';
 
 const routeMap: Array<RouteRecordRaw> = [
   {
     path: "/",
     redirect: "/home"
   },
-  {
-    path: "/home",
-    name: "home",
-    component: () => import("../views/primary.vue"),
-    meta: {
-      title: "首页",
-      icon: DashboardOutlined,
-      primary: true
-    },
-    children: [
-      {
-        path: "",
-        name: "home-index",
-        component: () => import("../views/home/index.vue"),
-        meta: { 
-          title: "首页",
-          icon: HomeOutlined,
-          closable: false
-        }
-      }
-    ]
-  },
-  {
-    path: "/feature",
-    name: "feature",
-    component: () => import("../views/primary.vue"),
-    meta: {
-      title: "功能",
-      icon: AppstoreOutlined,
-      primary: true
-    },
-    redirect: "/feature/download",
-    children: [
-      {
-        path: "download",
-        name: "download",
-        component: () => import("../views/feature/download.vue"),
-        meta: { 
-          title: "文件下载",
-          icon: DownloadOutlined
-        }
-      },
-      {
-        path: "request",
-        name: "request",
-        component: () => import("../views/feature/request.vue"),
-        meta: { 
-          title: "网络请求",
-          icon: GlobalOutlined
-        }
-      }
-    ]
-  },
-  {
-    path: "/examples",
-    name: "examples",
-    component: () => import("../views/primary.vue"),
-    meta: {
-      title: "示例",
-      icon: ExperimentOutlined,
-      primary: true
-    },
-    redirect: "/examples/componentsoverview",
-    children: [
-      {
-        path: "componentsoverview",
-        name: "componentsoverview",
-        component: () => import("../views/examples/antdesignvue/componentsoverview.vue"),
-        meta: { 
-          title: "组件总览",
-          icon: AppstoreAddOutlined
-        }
-      }
-    ]
-  },
-  {
-    path: "/tools",
-    name: "tools",
-    component: () => import("../views/primary.vue"),
-    meta: {
-      title: "工具",
-      icon: ToolOutlined,
-      primary: true
-    },
-    redirect: "/tools/md5",
-    children: [
-      {
-        path: "md5",
-        name: "md5",
-        component: () => import("../views/tools/md5.vue"),
-        meta: { 
-          title: "文件MD5",
-          icon: FileSearchOutlined
-        }
-      },
-      {
-        path: "debug",
-        name: "debug",
-        component: () => import("../views/tools/debug.vue"),
-        meta: { 
-          title: "调试工具",
-          icon: BugOutlined
-        }
-      }
-    ]
-  },
-  {
-    path: "/setting",
-    name: "setting",
-    component: () => import("../views/primary.vue"),
-    meta: {
-      title: "设置",
-      icon: ControlOutlined,
-      primary: true,
-      isSettings: true
-    },
-    redirect: "/setting/theme",
-    children: [
-      {
-        path: "theme",
-        name: "theme",
-        component: () => import("../views/setting/theme.vue"),
-        meta: { 
-          title: "主题设置",
-          icon: FileSearchOutlined
-        }
-      }
-    ]
-  }
+  homeRoute,
+  featureRoute,
+  examplesRoute,
+  toolsRoute,
+  settingRoute
 ];
 
 export default routeMap;
