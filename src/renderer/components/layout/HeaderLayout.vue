@@ -156,6 +156,8 @@ const onTabEdit: TabsProps['onEdit'] = (targetKey, action) => {
   font-size: 16px;
   font-weight: 500;
   color: rgba(0, 0, 0, 0.85);
+  user-select: none;
+  -webkit-user-select: none;
 }
 
 .tabs-container {
@@ -190,6 +192,9 @@ const onTabEdit: TabsProps['onEdit'] = (targetKey, action) => {
   background: transparent;
   border: 1px solid #f0f0f0;
   transition: all 0.3s;
+  user-select: none;
+  -webkit-user-select: none;
+  cursor: pointer;
 }
 
 .tabs-wrapper :deep(.ant-tabs-tab-active) {
@@ -236,5 +241,13 @@ const onTabEdit: TabsProps['onEdit'] = (targetKey, action) => {
 :deep(.ant-tabs-tab),
 .tabs-extra {
   -webkit-app-region: no-drag;
+}
+
+/* 确保所有文本内容不可选中 */
+.tabs-container,
+.tabs-wrapper :deep(.ant-tabs-nav),
+.tabs-wrapper :deep(.ant-tabs-tab-btn) {
+  user-select: none;
+  -webkit-user-select: none;
 }
 </style> 
