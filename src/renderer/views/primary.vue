@@ -49,6 +49,9 @@ const currentPageTitle = computed<string>(() => {
 
 // 处理菜单选择
 const handleMenuSelect = (routeName: string) => {
+  if (routeName.includes('submenu-') || routeName.includes('item-')) {
+    return;
+  }
   router.push({ name: routeName }).catch((err) => {
     console.error('Navigation error:', err);
   });

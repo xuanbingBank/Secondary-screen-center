@@ -42,7 +42,8 @@ const routeMap: Array<RouteRecordRaw> = [
     meta: {
       title: "工具",
       icon: SettingOutlined,
-      primary: true
+      primary: true,
+      isSettings: true
     },
     redirect: "/tools/md5",
     children: [

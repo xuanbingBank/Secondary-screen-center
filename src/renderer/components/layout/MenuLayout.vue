@@ -10,21 +10,42 @@
     <div class="logo">
       <img src="/electron.svg" alt="logo" />
     </div>
-    <a-menu 
-      theme="dark" 
-      mode="inline" 
-      v-model:selectedKeys="primarySelectedKeys"
-      @select="handlePrimarySelect"
-    >
-      <a-menu-item 
-        v-for="route in primaryMenuItems" 
-        :key="String(route.name)"
+    <!-- 主要菜单项 -->
+    <div class="primary-menu-container">
+      <a-menu 
+        theme="dark" 
+        mode="inline" 
+        v-model:selectedKeys="primarySelectedKeys"
+        @select="handlePrimarySelect"
       >
-        <template #icon>
-          <component :is="route.meta?.icon" />
-        </template>
-      </a-menu-item>
-    </a-menu>
+        <a-menu-item 
+          v-for="route in mainMenuItems" 
+          :key="String(route.name)"
+        >
+          <template #icon>
+            <component :is="route.meta?.icon" />
+          </template>
+        </a-menu-item>
+      </a-menu>
+
+      <!-- 设置菜单项 -->
+      <a-menu 
+        theme="dark" 
+        mode="inline" 
+        class="setting-menu"
+        v-model:selectedKeys="primarySelectedKeys"
+        @select="handlePrimarySelect"
+      >
+        <a-menu-item 
+          v-for="route in settingMenuItems" 
+          :key="String(route.name)"
+        >
+          <template #icon>
+            <component :is="route.meta?.icon" />
+          </template>
+        </a-menu-item>
+      </a-menu>
+    </div>
   </a-layout-sider>
 
   <!-- 二级菜单栏 -->
@@ -62,7 +83,7 @@
             <!-- 无子菜单 -->
             <a-menu-item 
               v-else 
-              :key="String(item.name)"
+              :key="`${String(item.name)}`"
             >
               <template #icon>
                 <component :is="item.meta?.icon" />
@@ -127,6 +148,16 @@ const emit = defineEmits<{
   (e: 'menu-select', routeName: string): void;
 }>();
 
+// 计算主要菜单项
+const mainMenuItems = computed(() => {
+  return routeMap.filter(route => route.meta?.primary && !route.meta?.isSettings);
+});
+
+// 计算设置菜单项
+const settingMenuItems = computed(() => {
+  return routeMap.filter(route => route.meta?.primary && route.meta?.isSettings);
+});
+
 // 计算一级菜单项
 const primaryMenuItems = computed(() => {
   return routeMap.filter(route => route.meta?.primary);
@@ -143,16 +174,19 @@ const currentSubMenus = computed(() => {
 const handlePrimarySelect: MenuProps['onSelect'] = (info) => {
   const route = routeMap.find(r => r.name === info.key.toString());
   if (route) {
+    // 只更新一级菜单的选中状态，不进行路由跳转
+    primarySelectedKeys.value = [route.name as string];
+    // 如果有子菜单，设置第一个子菜单为选中状态
     if (route.children?.length) {
-      emit('menu-select', route.children[0].name as string);
-    } else {
-      emit('menu-select', route.name as string);
+      selectedKeys.value = [route.children[0].name as string];
+      openKeys.value = [route.name as string];
     }
   }
 };
 
 // 处理二级菜单选择
 const handleMenuSelect: MenuProps['onSelect'] = (info) => {
+  // 只有点击二级菜单时才触发路由跳转
   emit('menu-select', info.key.toString());
 };
 
@@ -221,7 +255,7 @@ initSelectedKeys();
   right: -15px;
   top: 50%;
   transform: translateY(-50%);
-  width: 30px;
+  width: 40px;
   height: 30px;
   background: #fff;
   border-radius: 50%;
@@ -300,26 +334,22 @@ initSelectedKeys();
 }
 
 .primary-sider :deep(.ant-menu-item) {
-  height: 48px;
-  padding: 0 !important;
-  margin: 4px 0;
+  height: 40px;
+  width: 40px;
+  margin: 5px 4px;
+}
+.ant-menu-item-icon{
+vertical-align: 0px !important;
+}
+
+.primary-menu-container {
   display: flex;
-  align-items: center;
-  justify-content: center;
+  flex-direction: column;
+  height: calc(100% - 48px); /* 减去 logo 高度 */
+  justify-content: space-between;
 }
 
-.primary-sider :deep(.ant-menu-item .anticon) {
-  font-size: 18px;
-  line-height: 1;
-  margin-right: 0;
-}
-
-/* 移除一级菜单项的选中背景 */
-.primary-sider :deep(.ant-menu-item::after) {
-  display: none;
-}
-
-.primary-sider :deep(.ant-menu-item.ant-menu-item-selected) {
-  background-color: transparent;
+.setting-menu {
+  margin-bottom: 8px;
 }
 </style> 
