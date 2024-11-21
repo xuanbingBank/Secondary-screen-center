@@ -15,7 +15,29 @@ import { tourStepInfo } from "ant-design-vue/es/vc-tour";
 const routeMap: Array<RouteRecordRaw> = [
   {
     path: "/",
-    redirect: "/feature/download"
+    redirect: "/home"
+  },
+  {
+    path: "/home",
+    name: "home",
+    component: () => import("../views/primary.vue"),
+    meta: {
+      title: "首页",
+      icon: HomeOutlined,
+      primary: true
+    },
+    children: [
+      {
+        path: "",
+        name: "home-index",
+        component: () => import("../views/home/index.vue"),
+        meta: { 
+          title: "首页",
+          icon: HomeOutlined,
+          closable: false
+        }
+      }
+    ]
   },
   {
     path: "/feature",
