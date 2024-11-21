@@ -10,21 +10,37 @@
     <div class="logo">
       <img src="/electron.svg" alt="logo" />
     </div>
-    <a-menu 
-      theme="dark" 
-      mode="inline" 
-      v-model:selectedKeys="primarySelectedKeys"
-      @select="handlePrimarySelect"
-    >
-      <a-menu-item 
-        v-for="route in primaryMenuItems" 
-        :key="String(route.name)"
+    <div class="primary-menu-container">
+      <!-- 主要菜单 -->
+      <a-menu 
+        theme="dark" 
+        mode="inline" 
+        v-model:selectedKeys="primarySelectedKeys"
+        @select="handlePrimarySelect"
       >
-        <template #icon>
-          <component :is="route.meta?.icon" />
+        <!-- 普通菜单项 -->
+        <template v-for="route in normalMenuItems" :key="String(route.name)">
+          <a-menu-item>
+            <template #icon>
+              <component :is="route.meta?.icon" />
+            </template>
+          </a-menu-item>
         </template>
-      </a-menu-item>
-    </a-menu>
+
+        <!-- 分隔线 -->
+        <a-menu-divider v-if="settingMenuItems.length" />
+        <a-menu-divider v-if="settingMenuItems.length" />
+
+        <!-- 设置菜单项 -->
+        <template v-for="route in settingMenuItems" :key="String(route.name)">
+          <a-menu-item>
+            <template #icon>
+              <component :is="route.meta?.icon" />
+            </template>
+          </a-menu-item>
+        </template>
+      </a-menu>
+    </div>
   </a-layout-sider>
 
   <!-- 右侧二级菜单栏 -->
@@ -38,7 +54,7 @@
       <a-menu
         v-model:selectedKeys="selectedKeys"
         v-model:openKeys="openKeys"
-        mode="inline"
+        mode="vertical"
         @select="handleMenuSelect"
       >
         <template v-for="item in currentSubMenus" :key="String(item.name)">
@@ -114,6 +130,16 @@ const primaryMenuItems = computed(() => {
 const currentSubMenus = computed(() => {
   const currentPrimaryRoute = routeMap.find(r => r.name === primarySelectedKeys.value[0]);
   return currentPrimaryRoute?.children || [];
+});
+
+// 计算普通菜单项（非设置项）
+const normalMenuItems = computed(() => {
+  return routeMap.filter(route => route.meta?.primary && !route.meta?.isSettings);
+});
+
+// 计算设置菜单项
+const settingMenuItems = computed(() => {
+  return routeMap.filter(route => route.meta?.primary && route.meta?.isSettings);
 });
 
 // 处理一级菜单选择
@@ -292,14 +318,22 @@ onMounted(() => {
 
 /* 主菜单容器布局 */
 .primary-menu-container {
-  display: flex;
-  flex-direction: column;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
   height: calc(100% - 48px); /* 减去 logo 高度 */
-  justify-content: space-between;
 }
 
-/* 设置菜单底部间距 */
-.setting-menu {
-  margin-bottom: 8px;
+:deep(.ant-menu-dark .ant-menu-item-divider) {
+  margin: 4px 0;
+  background-color: rgba(255, 255, 255, 0.1);
 }
+
+:deep(.ant-menu-dark.ant-menu-inline .ant-menu-item) {
+  margin: 4px;
+  width: calc(100% - 8px);
+  border-radius: 4px;
+}
+
+
 </style> 
