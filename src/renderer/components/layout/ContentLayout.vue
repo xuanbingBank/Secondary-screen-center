@@ -10,6 +10,11 @@
       @minimize="$emit('minimize')"
       @exit="$emit('exit')"
       @fullscreen="toggleFullscreen"
+      @tab-reload="handleTabReload"
+      @close-left="handleCloseLeft"
+      @close-right="handleCloseRight"
+      @close-other="handleCloseOther"
+      @close-all="handleCloseAll"
     />
 
     <a-layout-content :class="['content', { 'content-fullscreen': isFullscreen }]">
@@ -77,6 +82,59 @@ const toggleFullscreen = () => {
   isFullscreen.value = !isFullscreen.value;
 };
 
+// 重新加载当前页面
+const handleTabReload = () => {
+  router.go(0);
+};
+
+// 关闭左侧标签
+const handleCloseLeft = (path: string) => {
+  const targetIndex = visitedTabs.value.findIndex(tab => tab.path === path);
+  if (targetIndex > 0) {
+    visitedTabs.value = visitedTabs.value.filter((tab, index) => {
+      return index >= targetIndex || !tab.closable;
+    });
+    // 如果关闭的包含当前活动标签，切换到目标标签
+    if (activeTab.value !== path) {
+      router.push(path);
+    }
+  }
+};
+
+// 关闭右侧标签
+const handleCloseRight = (path: string) => {
+  const targetIndex = visitedTabs.value.findIndex(tab => tab.path === path);
+  if (targetIndex < visitedTabs.value.length - 1) {
+    visitedTabs.value = visitedTabs.value.filter((tab, index) => {
+      return index <= targetIndex || !tab.closable;
+    });
+    // 如果关闭的包含当前活动标签，切换到目标标签
+    if (!visitedTabs.value.find(tab => tab.path === activeTab.value)) {
+      router.push(path);
+    }
+  }
+};
+
+// 关闭其他标签
+const handleCloseOther = (path: string) => {
+  visitedTabs.value = visitedTabs.value.filter(tab => {
+    return tab.path === path || !tab.closable;
+  });
+  // 如果当前活动标签被关闭，切换到保留的标签
+  if (activeTab.value !== path) {
+    router.push(path);
+  }
+};
+
+// 关闭全部标签
+const handleCloseAll = () => {
+  visitedTabs.value = visitedTabs.value.filter(tab => !tab.closable);
+  // 如果有首页标签，切换到首页，否则切换到第一个标签
+  const firstTab = visitedTabs.value[0];
+  if (firstTab) {
+    router.push(firstTab.path);
+  }
+};
 
 defineEmits(['minimize', 'exit']);
 </script>

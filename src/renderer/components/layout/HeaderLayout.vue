@@ -31,9 +31,40 @@
           <a-tab-pane
             v-for="tab in tabs"
             :key="tab.path"
-            :tab="tab.title"
             :closable="tab.closable"
-          />
+          >
+            <template #tab>
+              <a-dropdown 
+                :trigger="['contextmenu']"
+                @contextmenu.prevent
+              >
+                <span>{{ tab.title }}</span>
+                <template #overlay>
+                  <a-menu @click="({ key: menuKey }) => handleContextMenu(menuKey as string, tab.path)">
+                    <a-menu-item key="reload">重新加载</a-menu-item>
+                    <a-menu-divider />
+                    <a-menu-item 
+                      key="closeLeft"
+                      :disabled="isFirstTab(tab.path)"
+                    >关闭左侧标签</a-menu-item>
+                    <a-menu-item 
+                      key="closeRight"
+                      :disabled="isLastTab(tab.path)"
+                    >关闭右侧标签</a-menu-item>
+                    <a-menu-item 
+                      key="closeOther"
+                      :disabled="tabs.length <= 1"
+                    >关闭其他标签</a-menu-item>
+                    <a-menu-divider />
+                    <a-menu-item 
+                      key="closeAll"
+                      :disabled="!tab.closable"
+                    >关闭全部标签</a-menu-item>
+                  </a-menu>
+                </template>
+              </a-dropdown>
+            </template>
+          </a-tab-pane>
         </a-tabs>
         
         <!-- 全屏按钮 -->
@@ -55,25 +86,30 @@
 </template>
 
 <script setup lang="ts">
-import { computed, watch } from 'vue';
+import { computed } from 'vue';
 import { 
   MinusOutlined, 
   PoweroffOutlined,
   FullscreenOutlined,
   FullscreenExitOutlined
 } from '@ant-design/icons-vue';
-import type { TabItem } from '../../store/tabs';
 import type { TabsProps } from 'ant-design-vue';
 import type { Key } from 'ant-design-vue/es/vc-table/interface';
 
 interface Props {
   title: string;
-  tabs: TabItem[];
+  tabs: Array<{
+    title: string;
+    path: string;
+    closable?: boolean;
+  }>;
   activeTab: string;
   isFullscreen?: boolean;
 }
 
 const props = defineProps<Props>();
+
+// 扩展 emit 类型定义
 const emit = defineEmits<{
   (e: 'minimize'): void;
   (e: 'exit'): void;
@@ -81,6 +117,11 @@ const emit = defineEmits<{
   (e: 'tab-change', path: string): void;
   (e: 'tab-remove', path: string): void;
   (e: 'go-home'): void;
+  (e: 'tab-reload'): void;
+  (e: 'close-left', path: string): void;
+  (e: 'close-right', path: string): void;
+  (e: 'close-other', path: string): void;
+  (e: 'close-all'): void;
 }>();
 
 const activeKey = computed({
@@ -88,16 +129,36 @@ const activeKey = computed({
   set: (value: Key) => emit('tab-change', value.toString())
 });
 
-// 监听标签页数量
-watch(
-  () => props.tabs.length,
-  (newLength) => {
-    // 当标签页数量为0时，触发返回首页事件
-    if (newLength === 0) {
-      emit('go-home');
-    }
+// 判断是否为第一个标签
+const isFirstTab = (path: string) => {
+  return props.tabs[0]?.path === path;
+};
+
+// 判断是否为最后一个标签
+const isLastTab = (path: string) => {
+  return props.tabs[props.tabs.length - 1]?.path === path;
+};
+
+// 处理右键菜单点击
+const handleContextMenu = (menuKey: string, path: string) => {
+  switch (menuKey) {
+    case 'reload':
+      emit('tab-reload');
+      break;
+    case 'closeLeft':
+      emit('close-left', path);
+      break;
+    case 'closeRight':
+      emit('close-right', path);
+      break;
+    case 'closeOther':
+      emit('close-other', path);
+      break;
+    case 'closeAll':
+      emit('close-all');
+      break;
   }
-);
+};
 
 // 标签页切换
 const onTabChange: TabsProps['onChange'] = (key: Key) => {
@@ -108,26 +169,19 @@ const onTabChange: TabsProps['onChange'] = (key: Key) => {
 const onTabEdit: TabsProps['onEdit'] = (targetKey, action) => {
   if (action === 'remove' && targetKey !== undefined) {
     const currentKey = targetKey.toString();
-    // 找到当前要关闭的标签的索引
     const targetIndex = props.tabs.findIndex(tab => tab.path === currentKey);
     
-    // 如果关闭的是当前激活的标签，需要切换到左边的标签
     if (currentKey === props.activeTab) {
-      // 如果还有其他标签
       if (props.tabs.length > 1) {
-        // 如果关闭的是第一个标签，切换到新的第一个标签
-        // 否则切换到左边的标签
         const newActiveKey = targetIndex === 0 
           ? props.tabs[1].path 
           : props.tabs[targetIndex - 1].path;
         emit('tab-change', newActiveKey);
       } else {
-        // 如果是最后一个标签，触发返回首页
         emit('go-home');
       }
     }
     
-    // 触发移除标签事件
     emit('tab-remove', currentKey);
   }
 };
@@ -249,5 +303,31 @@ const onTabEdit: TabsProps['onEdit'] = (targetKey, action) => {
 .tabs-wrapper :deep(.ant-tabs-tab-btn) {
   user-select: none;
   -webkit-user-select: none;
+}
+
+/* 右键菜单样式 */
+:deep(.ant-dropdown-menu) {
+  min-width: 120px;
+}
+
+:deep(.ant-dropdown-menu-item) {
+  padding: 5px 12px;
+  font-size: 12px;
+}
+
+:deep(.ant-dropdown-menu-item:hover) {
+  background: #e6f7ff;
+}
+
+:deep(.ant-dropdown-menu-item-disabled) {
+  color: rgba(0, 0, 0, 0.25);
+  cursor: not-allowed;
+}
+
+/* 标签页文字居中 */
+:deep(.ant-tabs-tab-btn) {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
 }
 </style> 
