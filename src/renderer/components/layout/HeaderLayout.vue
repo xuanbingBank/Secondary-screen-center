@@ -19,28 +19,49 @@
 
     <!-- 标签页 -->
     <div class="tabs-container">
-      <a-tabs
-        v-model:activeKey="activeKey"
-        type="editable-card"
-        hide-add
-        size="small"
-        @edit="onTabEdit"
-        @change="onTabChange"
-      >
-        <a-tab-pane
-          v-for="tab in tabs"
-          :key="tab.path"
-          :tab="tab.title"
-          :closable="tab.closable"
-        />
-      </a-tabs>
+      <div class="tabs-wrapper">
+        <a-tabs
+          v-model:activeKey="activeKey"
+          type="editable-card"
+          hide-add
+          size="small"
+          @edit="onTabEdit"
+          @change="onTabChange"
+        >
+          <a-tab-pane
+            v-for="tab in tabs"
+            :key="tab.path"
+            :tab="tab.title"
+            :closable="tab.closable"
+          />
+        </a-tabs>
+        
+        <!-- 全屏按钮 -->
+        <div class="tabs-extra">
+          <a-button 
+            type="text" 
+            class="fullscreen-btn"
+            @click="$emit('fullscreen')"
+          >
+            <template #icon>
+              <fullscreen-outlined v-if="!isFullscreen" />
+              <fullscreen-exit-outlined v-else />
+            </template>
+          </a-button>
+        </div>
+      </div>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
 import { computed } from 'vue';
-import { MinusOutlined, PoweroffOutlined } from '@ant-design/icons-vue';
+import { 
+  MinusOutlined, 
+  PoweroffOutlined,
+  FullscreenOutlined,
+  FullscreenExitOutlined
+} from '@ant-design/icons-vue';
 import type { TabItem } from '../../store/tabs';
 import type { TabsProps } from 'ant-design-vue';
 import type { Key } from 'ant-design-vue/es/vc-table/interface';
@@ -49,12 +70,14 @@ interface Props {
   title: string;
   tabs: TabItem[];
   activeTab: string;
+  isFullscreen?: boolean;
 }
 
 const props = defineProps<Props>();
 const emit = defineEmits<{
   (e: 'minimize'): void;
   (e: 'exit'): void;
+  (e: 'fullscreen'): void;
   (e: 'tab-change', path: string): void;
   (e: 'tab-remove', path: string): void;
 }>();
@@ -102,65 +125,74 @@ const onTabEdit: TabsProps['onEdit'] = (targetKey, action) => {
 }
 
 .tabs-container {
-  padding: 0 8px;
+  padding: 2px 8px 0;
   background: #fff;
-  height: 36px;
-  display: flex;
-  align-items: flex-end;
+  height: 34px;
+  border-bottom: 1px solid #f0f0f0;
 }
 
-:deep(.ant-tabs) {
-  background: #fff;
-  width: 100%;
-}
-
-:deep(.ant-tabs-nav) {
-  margin: 0;
-  background: #fff;
-  height: 32px;
-  line-height: 32px;
-  margin-bottom: -1px;
-}
-
-:deep(.ant-tabs-card > .ant-tabs-nav .ant-tabs-tab) {
-  background: transparent;
-  border-color: #f0f0f0;
-  padding: 0 12px;
-  height: 28px;
-  line-height: 26px;
-  font-size: 13px;
-  min-width: 80px;
+.tabs-wrapper {
+  position: relative;
   display: flex;
   align-items: center;
-  justify-content: center;
-  margin-bottom: 0;
+  height: calc(100% - 2px);
 }
 
-:deep(.ant-tabs-card > .ant-tabs-nav .ant-tabs-tab-active) {
+.tabs-wrapper :deep(.ant-tabs) {
+  flex: 1;
+}
+
+.tabs-wrapper :deep(.ant-tabs-nav) {
+  margin: 0;
+  height: 30px;
+  line-height: 30px;
+}
+
+.tabs-wrapper :deep(.ant-tabs-tab) {
+  height: 30px;
+  line-height: 28px;
+  padding: 0 12px !important;
+  background: transparent;
+  border: 1px solid #f0f0f0;
+  transition: all 0.3s;
+}
+
+.tabs-wrapper :deep(.ant-tabs-tab-active) {
   background: #fff;
   border-bottom-color: #fff;
 }
 
-:deep(.ant-tabs-tab + .ant-tabs-tab) {
-  margin-left: 3px;
-}
-
-:deep(.ant-tabs-nav::before) {
-  border-bottom: none;
-}
-
-:deep(.ant-tabs-tab-remove) {
-  margin-left: 6px;
-  font-size: 12px;
-}
-
-:deep(.ant-btn) {
-  height: 28px;
-  width: 28px;
+.tabs-wrapper :deep(.ant-tabs-nav-wrap) {
   padding: 0;
 }
 
-:deep(.anticon) {
-  font-size: 14px;
+.tabs-extra {
+  position: absolute;
+  right: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  padding-right: 8px;
+  background: #fff;
+}
+
+.fullscreen-btn {
+  height: 28px;
+  width: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: rgba(0, 0, 0, 0.45);
+  transition: all 0.3s;
+}
+
+.fullscreen-btn:hover {
+  color: rgba(0, 0, 0, 0.85);
+  background: rgba(0, 0, 0, 0.025);
+}
+
+/* 全屏时隐藏其他元素 */
+:deep(.content-fullscreen) .header,
+:deep(.content-fullscreen) .tabs-container {
+  display: none;
 }
 </style> 

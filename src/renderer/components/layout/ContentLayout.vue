@@ -1,18 +1,30 @@
 <template>
   <a-layout class="main-container">
-    <!-- 顶栏 -->
     <header-layout 
       :title="currentPageTitle"
       :tabs="visitedTabs"
       :activeTab="activeTab"
+      :is-fullscreen="isFullscreen"
       @tab-change="handleTabChange"
       @tab-remove="handleTabRemove"
       @minimize="$emit('minimize')"
       @exit="$emit('exit')"
+      @fullscreen="toggleFullscreen"
     />
 
-    <!-- 主页面内容区 -->
-    <a-layout-content class="content">
+    <a-layout-content :class="['content', { 'content-fullscreen': isFullscreen }]">
+      <div v-show="isFullscreen" class="float-fullscreen-btn">
+        <a-button 
+          type="primary"
+          shape="circle"
+          @click="toggleFullscreen"
+        >
+          <template #icon>
+            <fullscreen-exit-outlined />
+          </template>
+        </a-button>
+      </div>
+
       <router-view v-slot="{ Component }">
         <transition name="fade" mode="out-in">
           <component :is="Component" />
@@ -23,8 +35,9 @@
 </template>
 
 <script setup lang="ts">
-import { computed, watch } from 'vue';
+import { computed, ref, watch } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
+import { FullscreenExitOutlined } from '@ant-design/icons-vue';
 import HeaderLayout from './HeaderLayout.vue';
 import { visitedTabs, activeTab, addTab, removeTab } from '../../store/tabs';
 
@@ -64,6 +77,14 @@ const handleTabRemove = (path: string) => {
   }
 };
 
+// 全屏状态
+const isFullscreen = ref(false);
+
+// 切换全屏
+const toggleFullscreen = () => {
+  isFullscreen.value = !isFullscreen.value;
+};
+
 defineEmits(['minimize', 'exit']);
 </script>
 
@@ -79,6 +100,47 @@ defineEmits(['minimize', 'exit']);
   padding: 24px;
   background: #f0f2f5;
   overflow-y: auto;
+  transition: all 0.3s;
+  position: relative;
+}
+
+.content-fullscreen {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 1000;
+  padding: 24px;
+  margin: 0;
+  background: #fff;
+}
+
+/* 悬浮按钮样式 */
+.float-fullscreen-btn {
+  position: fixed;
+  top: 16px;
+  right: 16px;
+  z-index: 1001;
+  transition: opacity 0.3s;
+}
+
+.float-fullscreen-btn:hover {
+  opacity: 1;
+}
+
+.float-fullscreen-btn .ant-btn {
+  width: 40px;
+  height: 40px;
+  font-size: 18px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  opacity: 0.8;
+}
+
+.float-fullscreen-btn .ant-btn:hover {
+  opacity: 1;
+  transform: scale(1.1);
+  transition: all 0.3s;
 }
 
 .fade-enter-active,
