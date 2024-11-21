@@ -1,5 +1,5 @@
 <template>
-  <!-- 左侧菜单栏 -->
+  <!-- 左侧一级菜单栏 -->
   <a-layout-sider
     width="48"
     class="primary-sider"
@@ -7,17 +7,20 @@
     :trigger="null"
     collapsible
   >
+    <!-- Logo区域 -->
     <div class="logo">
       <img src="/electron.svg" alt="logo" />
     </div>
-    <!-- 主要菜单项 -->
+    <!-- 主要菜单容器 -->
     <div class="primary-menu-container">
+      <!-- 主要功能菜单 -->
       <a-menu 
         theme="dark" 
         mode="inline" 
         v-model:selectedKeys="primarySelectedKeys"
         @select="handlePrimarySelect"
       >
+        <!-- 遍历生成主要菜单项 -->
         <a-menu-item 
           v-for="route in mainMenuItems" 
           :key="String(route.name)"
@@ -28,7 +31,7 @@
         </a-menu-item>
       </a-menu>
 
-      <!-- 设置菜单项 -->
+      <!-- 设置类菜单（底部） -->
       <a-menu 
         theme="dark" 
         mode="inline" 
@@ -36,6 +39,7 @@
         v-model:selectedKeys="primarySelectedKeys"
         @select="handlePrimarySelect"
       >
+        <!-- 遍历生成设置菜单项 -->
         <a-menu-item 
           v-for="route in settingMenuItems" 
           :key="String(route.name)"
@@ -48,13 +52,14 @@
     </div>
   </a-layout-sider>
 
-  <!-- 二级菜单栏 -->
+  <!-- 右侧二级菜单栏 -->
   <a-layout-sider
     v-model:collapsed="collapsed"
     class="secondary-sider"
     :trigger="null"
     collapsible
   >
+    <!-- 菜单内容区域 -->
     <div class="menu-wrapper">
       <a-menu
         v-model:selectedKeys="selectedKeys"
@@ -62,9 +67,10 @@
         mode="inline"
         @select="handleMenuSelect"
       >
+        <!-- 二级菜单列表 -->
         <template v-if="currentSubMenus.length">
           <template v-for="item in currentSubMenus" :key="String(item.name)">
-            <!-- 有子菜单 -->
+            <!-- 有子菜单的菜单项 -->
             <a-sub-menu 
               v-if="item.children?.length" 
               :key="String(item.name)"
@@ -73,6 +79,7 @@
                 <component :is="item.meta?.icon" />
               </template>
               <template #title>{{ item.meta?.title }}</template>
+              <!-- 子菜单项列表 -->
               <a-menu-item 
                 v-for="child in item.children"
                 :key="String(child.name)"
@@ -80,7 +87,7 @@
                 {{ child.meta?.title }}
               </a-menu-item>
             </a-sub-menu>
-            <!-- 无子菜单 -->
+            <!-- 无子菜单的菜单项 -->
             <a-menu-item 
               v-else 
               :key="`${String(item.name)}`"
@@ -95,7 +102,7 @@
       </a-menu>
     </div>
 
-    <!-- 折叠按钮 -->
+    <!-- 中间折叠按钮 -->
     <div class="collapse-trigger">
       <menu-unfold-outlined
         v-if="collapsed"
@@ -109,6 +116,7 @@
       />
     </div>
 
+    <!-- 底部折叠按钮 -->
     <div class="bottom-trigger">
       <a-button 
         type="text"
@@ -125,6 +133,7 @@
 </template>
 
 <script setup lang="ts">
+// 导入所需的组件和工具
 import { ref, computed } from 'vue';
 import { useRouter, useRoute } from 'vue-router';
 import type { MenuProps } from 'ant-design-vue';
@@ -134,21 +143,22 @@ import {
   MenuFoldOutlined,
 } from '@ant-design/icons-vue';
 
+// 获取路由实例
 const router = useRouter();
 const route = useRoute();
 
-// 状态
-const collapsed = ref(false);
-const primarySelectedKeys = ref<string[]>(['feature']);
-const selectedKeys = ref<string[]>([]);
-const openKeys = ref<string[]>([]);
+// 菜单状态管理
+const collapsed = ref(false);                        // 二级菜单折叠状态
+const primarySelectedKeys = ref<string[]>(['feature']); // 一级菜单选中项
+const selectedKeys = ref<string[]>([]);              // 二级菜单选中项
+const openKeys = ref<string[]>([]);                  // 展开的子菜单
 
-// 定义事件
+// 定义组件事件
 const emit = defineEmits<{
-  (e: 'menu-select', routeName: string): void;
+  (e: 'menu-select', routeName: string): void;      // 菜单选择事件
 }>();
 
-// 计算主要菜单项
+// 计算主要菜单项（非设置类）
 const mainMenuItems = computed(() => {
   return routeMap.filter(route => route.meta?.primary && !route.meta?.isSettings);
 });
@@ -158,7 +168,7 @@ const settingMenuItems = computed(() => {
   return routeMap.filter(route => route.meta?.primary && route.meta?.isSettings);
 });
 
-// 计算一级菜单项
+// 计算一级菜单项（所有）
 const primaryMenuItems = computed(() => {
   return routeMap.filter(route => route.meta?.primary);
 });
@@ -174,7 +184,7 @@ const currentSubMenus = computed(() => {
 const handlePrimarySelect: MenuProps['onSelect'] = (info) => {
   const route = routeMap.find(r => r.name === info.key.toString());
   if (route) {
-    // 只更新一级菜单的选中状态，不进行路由跳转
+    // 更新一级菜单选中状态
     primarySelectedKeys.value = [route.name as string];
     // 如果有子菜单，设置第一个子菜单为选中状态
     if (route.children?.length) {
@@ -186,25 +196,28 @@ const handlePrimarySelect: MenuProps['onSelect'] = (info) => {
 
 // 处理二级菜单选择
 const handleMenuSelect: MenuProps['onSelect'] = (info) => {
-  // 只有点击二级菜单时才触发路由跳转
+  // 触发路由跳转事件
   emit('menu-select', info.key.toString());
 };
 
-// 初始化选中状态
+// 初始化菜单选中状态
 const initSelectedKeys = () => {
   const matched = route.matched;
   if (matched.length) {
+    // 设置一级菜单选中状态
     const primaryRoute = matched[0];
     primarySelectedKeys.value = [primaryRoute.name as string];
+    // 设置二级菜单选中状态
     selectedKeys.value = [matched[matched.length - 1].name as string];
     
+    // 设置子菜单展开状态
     if (matched.length > 1) {
       openKeys.value = [matched[1].name as string];
     }
   }
 };
 
-// 监听路由变化
+// 监听路由变化，更新菜单状态
 router.afterEach(() => {
   initSelectedKeys();
 });
@@ -214,6 +227,12 @@ initSelectedKeys();
 </script>
 
 <style scoped>
+/* 禁止文本选择 */
+* {
+    user-select: none;
+}
+
+/* 一级菜单侧边栏样式 */
 .primary-sider {
   overflow: hidden;
   flex: 0 0 48px !important;
@@ -222,6 +241,7 @@ initSelectedKeys();
   width: 48px !important;
 }
 
+/* Logo 样式 */
 .logo {
   height: 48px;
   padding: 8px;
@@ -235,6 +255,7 @@ initSelectedKeys();
   object-fit: contain;
 }
 
+/* 二级菜单侧边栏样式 */
 .secondary-sider {
   background: #fff;
   position: relative;
@@ -244,18 +265,24 @@ initSelectedKeys();
   height: 100vh;
 }
 
+.ant-menu-item-selected {
+    margin-left: 10px;
+}
+
+/* 菜单内容区域样式 */
 .menu-wrapper {
   flex: 1;
   overflow-y: auto;
   min-height: 0;
 }
 
+/* 中间折叠按钮样式 */
 .collapse-trigger {
   position: absolute;
   right: -15px;
   top: 50%;
   transform: translateY(-50%);
-  width: 40px;
+  width: 30px;
   height: 30px;
   background: #fff;
   border-radius: 50%;
@@ -269,10 +296,12 @@ initSelectedKeys();
   transition: opacity 0.3s;
 }
 
+/* 鼠标悬停时显示折叠按钮 */
 .secondary-sider:hover .collapse-trigger {
   opacity: 1;
 }
 
+/* 折叠按钮图标样式 */
 .trigger-icon {
   color: #595959;
   font-size: 16px;
@@ -283,6 +312,7 @@ initSelectedKeys();
   color: #1890ff;
 }
 
+/* 底部折叠按钮样式 */
 .bottom-trigger {
   border-top: 1px solid #f0f0f0;
 }
@@ -297,24 +327,6 @@ initSelectedKeys();
   background: #e6f7ff;
 }
 
-/* 头部样式 */
-.header {
-  background: #fff;
-  padding: 0 24px;
-  display: flex;
-  justify-content: flex-end;
-  align-items: center;
-  box-shadow: 0 1px 4px rgba(0, 21, 41, 0.08);
-  z-index: 9;
-}
-
-.content {
-  margin: 24px;
-  padding: 24px;
-  background: #fff;
-  min-height: 280px;
-}
-
 /* 菜单项样式调整 */
 :deep(.ant-menu-item) {
   height: 48px;
@@ -322,13 +334,14 @@ initSelectedKeys();
   margin: 0;
 }
 
+/* 菜单容器样式 */
 :deep(.ant-layout-sider-children) {
   display: flex;
   flex-direction: column;
   height: 100%;
 }
 
-/* 一级菜单样式调整 */
+/* 一级菜单特殊样式 */
 .primary-sider :deep(.ant-menu-inline) {
   border-right: none;
 }
@@ -338,10 +351,13 @@ initSelectedKeys();
   width: 40px;
   margin: 5px 4px;
 }
-.ant-menu-item-icon{
-vertical-align: 0px !important;
+
+/* 菜单图标对齐调整 */
+.ant-menu-item-icon {
+  vertical-align: 0px !important;
 }
 
+/* 主菜单容器布局 */
 .primary-menu-container {
   display: flex;
   flex-direction: column;
@@ -349,6 +365,7 @@ vertical-align: 0px !important;
   justify-content: space-between;
 }
 
+/* 设置菜单底部间距 */
 .setting-menu {
   margin-bottom: 8px;
 }
