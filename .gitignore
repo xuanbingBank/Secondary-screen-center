@@ -7,3 +7,4 @@ md
 .idea
 *.exe
 nsis-3.08/
+.lock
