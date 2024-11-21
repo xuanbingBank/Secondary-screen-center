@@ -62,7 +62,7 @@
           <!-- 无子菜单的菜单项 -->
           <a-menu-item 
             v-else 
-            :key="String(item.name)"
+            :key="`${String(item.name)}`"
           >
             <template #icon>
               <component :is="item.meta?.icon" />
