@@ -8,7 +8,10 @@ import {
   GlobalOutlined,
   FileSearchOutlined,
   BugOutlined,
-  AppstoreAddOutlined
+  AppstoreAddOutlined,
+  ControlOutlined,
+  DashboardOutlined,
+  ToolOutlined
 } from '@ant-design/icons-vue';
 import { tourStepInfo } from "ant-design-vue/es/vc-tour";
 
@@ -23,7 +26,7 @@ const routeMap: Array<RouteRecordRaw> = [
     component: () => import("../views/primary.vue"),
     meta: {
       title: "首页",
-      icon: HomeOutlined,
+      icon: DashboardOutlined,
       primary: true
     },
     children: [
@@ -84,10 +87,10 @@ const routeMap: Array<RouteRecordRaw> = [
       {
         path: "componentsoverview",
         name: "componentsoverview",
-        component: () => import("../views/examples/componentsoverview.vue"),
+        component: () => import("../views/examples/antdesignvue/componentsoverview.vue"),
         meta: { 
           title: "组件总览",
-          icon: AppstoreOutlined
+          icon: AppstoreAddOutlined
         }
       }
     ]
@@ -98,9 +101,8 @@ const routeMap: Array<RouteRecordRaw> = [
     component: () => import("../views/primary.vue"),
     meta: {
       title: "工具",
-      icon: SettingOutlined,
-      primary: true,
-      isSettings: true
+      icon: ToolOutlined,
+      primary: true
     },
     redirect: "/tools/md5",
     children: [
@@ -120,6 +122,29 @@ const routeMap: Array<RouteRecordRaw> = [
         meta: { 
           title: "调试工具",
           icon: BugOutlined
+        }
+      }
+    ]
+  },
+  {
+    path: "/setting",
+    name: "setting",
+    component: () => import("../views/primary.vue"),
+    meta: {
+      title: "设置",
+      icon: ControlOutlined,
+      primary: true,
+      isSettings: true
+    },
+    redirect: "/setting/theme",
+    children: [
+      {
+        path: "theme",
+        name: "theme",
+        component: () => import("../views/setting/theme.vue"),
+        meta: { 
+          title: "主题设置",
+          icon: FileSearchOutlined
         }
       }
     ]
