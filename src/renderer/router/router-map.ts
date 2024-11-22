@@ -4,6 +4,7 @@ import { featureRoute } from './modules/feature';
 import { examplesRoute } from './modules/examples';
 import { toolsRoute } from './modules/tools';
 import { settingRoute } from './modules/setting';
+import { profileRoutes } from './modules/profile';
 
 const routeMap: Array<RouteRecordRaw> = [
   {
@@ -12,8 +13,9 @@ const routeMap: Array<RouteRecordRaw> = [
   },
   homeRoute,
   featureRoute,
-  examplesRoute,
+  profileRoutes,
   toolsRoute,
+  examplesRoute,
   settingRoute
 ];
 
