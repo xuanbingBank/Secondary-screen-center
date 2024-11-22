@@ -54,37 +54,12 @@
       <a-menu
         v-model:selectedKeys="selectedKeys"
         v-model:openKeys="openKeys"
-        mode="vertical"
+        mode="inline"
         @select="handleMenuSelect"
+        :inline-collapsed="collapsed"
       >
         <template v-for="item in currentSubMenus" :key="String(item.name)">
-          <!-- 有子菜单的菜单项 -->
-          <a-sub-menu 
-            v-if="item.children?.length" 
-            :key="String(item.name)"
-            :popupClassName="collapsed ? 'persistent-submenu' : ''"
-          >
-            <template #icon>
-              <component :is="item.meta?.icon" />
-            </template>
-            <template #title>{{ item.meta?.title }}</template>
-            <a-menu-item 
-              v-for="child in item.children"
-              :key="String(child.name)"
-            >
-              {{ child.meta?.title }}
-            </a-menu-item>
-          </a-sub-menu>
-          <!-- 无子菜单的菜单项 -->
-          <a-menu-item 
-            v-else 
-            :key="`${String(item.name)}`"
-          >
-            <template #icon>
-              <component :is="item.meta?.icon" />
-            </template>
-            <span>{{ item.meta?.title }}</span>
-          </a-menu-item>
+          <recursive-menu :menu-info="item" />
         </template>
       </a-menu>
     </div>
@@ -109,11 +84,12 @@
 import { ref, computed, onMounted } from 'vue';
 import { useRoute } from 'vue-router';
 import type { MenuProps } from 'ant-design-vue';
-import routeMap from '../../router/router-map';
 import {
   MenuFoldOutlined,
   MenuUnfoldOutlined,
 } from '@ant-design/icons-vue';
+import routeMap from '../../router/router-map';
+import RecursiveMenu from '../menu/RecursiveMenu.vue';
 
 const route = useRoute();
 const collapsed = ref(false);
@@ -169,7 +145,9 @@ const initSelectedKeys = () => {
     
     if (matched.length > 1) {
       selectedKeys.value = [matched[matched.length - 1].name as string];
-      openKeys.value = [matched[1].name as string];
+      openKeys.value = matched
+        .slice(1, -1)
+        .map(item => item.name as string);
     }
   }
 };
@@ -335,5 +313,40 @@ onMounted(() => {
   border-radius: 4px;
 }
 
+/* 添加多级菜单的样式 */
+:deep(.ant-menu-submenu-inline) {
+  transition: all 0.3s;
+}
+
+:deep(.ant-menu-submenu-inline > .ant-menu-submenu-title) {
+  height: 40px;
+  line-height: 40px;
+  padding-left: 24px !important;
+}
+
+:deep(.ant-menu-sub.ant-menu-inline) {
+  background: transparent;
+}
+
+:deep(.ant-menu-submenu-arrow) {
+  transition: transform 0.3s;
+}
+
+/* 折叠时的子菜单样式 */
+:deep(.ant-menu-inline-collapsed .ant-menu-submenu-title) {
+  padding: 0 !important;
+  text-align: center;
+}
+
+:deep(.persistent-submenu) {
+  position: fixed;
+  top: 0;
+  left: 100%;
+  min-width: 200px;
+  border-radius: 4px;
+  box-shadow: 0 3px 6px -4px rgba(0, 0, 0, 0.12), 
+              0 6px 16px 0 rgba(0, 0, 0, 0.08), 
+              0 9px 28px 8px rgba(0, 0, 0, 0.05);
+}
 
 </style> 
