@@ -194,8 +194,8 @@ const onTabEdit: TabsProps['onEdit'] = (targetKey, action) => {
 }
 
 .header {
-  height: 48px;
-  line-height: 48px;
+  height: 32px;
+  line-height: 32px;
   padding: 0 16px;
   display: flex;
   justify-content: space-between;
@@ -207,7 +207,7 @@ const onTabEdit: TabsProps['onEdit'] = (targetKey, action) => {
 
 .header-left h2 {
   margin: 0;
-  font-size: 16px;
+  font-size: 14px;
   font-weight: 500;
   color: rgba(0, 0, 0, 0.85);
   user-select: none;
@@ -217,7 +217,7 @@ const onTabEdit: TabsProps['onEdit'] = (targetKey, action) => {
 .tabs-container {
   padding: 2px 8px 0;
   background: #fff;
-  height: 34px;
+  height: 32px;
   border-bottom: 1px solid #f0f0f0;
   -webkit-app-region: no-drag;
 }
