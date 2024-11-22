@@ -86,7 +86,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed, onMounted, watch } from 'vue';
+import { computed, onMounted, watch, ref } from 'vue';
 import { useRouter } from 'vue-router';
 import { message } from 'ant-design-vue';
 import { 
@@ -97,7 +97,7 @@ import {
 } from '@ant-design/icons-vue';
 import type { TabsProps } from 'ant-design-vue';
 import type { Key } from 'ant-design-vue/es/vc-table/interface';
-import { tabDB, type TabInfo } from '../../utils/db';
+import { tabDB, type TabInfo } from '../../utils/indexedDB';
 
 interface Props {
   title: string;
@@ -189,8 +189,16 @@ const onTabEdit: TabsProps['onEdit'] = (targetKey, action) => {
   }
 };
 
+// 添加一个状态来跟踪初始化
+const isInitialized = ref(false);
+
 // 监听标签页变化并保存
 watch(() => props.tabs, async (newTabs) => {
+  // 只有在初始化完成后才进行保存操作
+  if (!isInitialized.value) {
+    return;
+  }
+
   try {
     if (newTabs.length > 0) {
       // 保存标签页时同时保存当前活动的标签页
@@ -203,7 +211,10 @@ watch(() => props.tabs, async (newTabs) => {
     }
   } catch (error) {
     console.error('Failed to save tabs:', error);
-    message.error('保存标签页失败');
+    // 只在非初始化阶段显示错误提示
+    if (isInitialized.value) {
+      message.error('保存标签页失败');
+    }
   }
 }, { deep: true });
 
@@ -241,6 +252,9 @@ onMounted(async () => {
   } catch (error) {
     console.error('Failed to load saved tabs:', error);
     message.error('加载已保存的标签页失败');
+  } finally {
+    // 标记初始化完成
+    isInitialized.value = true;
   }
 });
 </script>

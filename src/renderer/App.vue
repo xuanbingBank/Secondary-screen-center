@@ -11,7 +11,7 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue';
 import { useRouter, useRoute } from 'vue-router';
-import { tabDB } from './utils/db';
+import { tabDB } from './utils/indexedDB';
 
 const router = useRouter();
 const route = useRoute();
