@@ -86,7 +86,9 @@
 </template>
 
 <script setup lang="ts">
-import { computed } from 'vue';
+import { computed, onMounted, watch } from 'vue';
+import { useRouter } from 'vue-router';
+import { message } from 'ant-design-vue';
 import { 
   MinusOutlined, 
   PoweroffOutlined,
@@ -95,6 +97,7 @@ import {
 } from '@ant-design/icons-vue';
 import type { TabsProps } from 'ant-design-vue';
 import type { Key } from 'ant-design-vue/es/vc-table/interface';
+import { tabDB, type TabInfo } from '../../utils/db';
 
 interface Props {
   title: string;
@@ -185,6 +188,61 @@ const onTabEdit: TabsProps['onEdit'] = (targetKey, action) => {
     emit('tab-remove', currentKey);
   }
 };
+
+// 监听标签页变化并保存
+watch(() => props.tabs, async (newTabs) => {
+  try {
+    if (newTabs.length > 0) {
+      // 保存标签页时同时保存当前活动的标签页
+      await tabDB.saveTabs(newTabs.map(tab => ({
+        ...tab,
+        active: tab.path === props.activeTab
+      })));
+    } else {
+      await tabDB.clearTabs();
+    }
+  } catch (error) {
+    console.error('Failed to save tabs:', error);
+    message.error('保存标签页失败');
+  }
+}, { deep: true });
+
+const router = useRouter();
+
+// 组件挂载时加载保存的标签页
+onMounted(async () => {
+  try {
+    const savedTabs = await tabDB.getTabs();
+    if (savedTabs && savedTabs.length > 0) {
+      // 确保所有标签页的路由都存在
+      const validTabs = savedTabs.filter(tab => {
+        try {
+          router.resolve(tab.path);
+          return true;
+        } catch {
+          return false;
+        }
+      });
+      
+      // 先清空现有标签页
+      emit('close-all');
+      
+      // 按顺序恢复所有标签页
+      for (const tab of validTabs) {
+        await router.push(tab.path);
+        emit('tab-change', tab.path);
+      }
+      
+      // 设置最后一个标签页为活动标签页
+      if (validTabs.length > 0) {
+        emit('tab-change', validTabs[validTabs.length - 1].path);
+      }
+    }
+  } catch (error) {
+    console.error('Failed to load saved tabs:', error);
+    message.error('加载已保存的标签页失败');
+  }
+});
 </script>
 
 <style scoped>

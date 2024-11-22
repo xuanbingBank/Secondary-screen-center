@@ -26,6 +26,7 @@ export default defineConfig({
       "@lib": path.join(__dirname, "../lib"),
       "@file-download": path.join(__dirname, "../lib/file-download"),
       "@utils": path.join(__dirname, "../lib/utils"),
+      "@renderer": path.join(__dirname, "renderer"),
     },
   },
   plugins: [
