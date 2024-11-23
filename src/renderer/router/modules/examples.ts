@@ -20,7 +20,7 @@ export const examplesRoute: RouteRecordRaw = {
   },
   children: [
     {
-      path: "antdv",
+      path: "ant-design-vue",
       name: "examples-antdv",
       meta: { 
         title: "Ant Design Vue文档",
@@ -28,6 +28,26 @@ export const examplesRoute: RouteRecordRaw = {
         primary: true
       },
       children: [
+        {
+          path: "/general",
+          name: "general",
+          meta: {
+            title: "通用",
+            icon: LayoutOutlined,
+            primary: true
+          },
+          children: [
+            {
+              path: "button",
+              name: "examples-antdv-button",
+              component: () => import("../../views/examples/ant-design-vue/general/button.vue"),
+              meta: {
+                title: "按钮示例",
+                icon: BorderOutlined
+              }
+            }
+          ]
+        },
         {
           path: "overview",
           name: "examples-antdv-overview",
@@ -37,15 +57,6 @@ export const examplesRoute: RouteRecordRaw = {
             icon: ProfileOutlined
           }
         },
-        {
-          path: "button",
-          name: "examples-antdv-button",
-          component: () => import("../../views/examples/ant-design-vue/button.vue"),
-          meta: {
-            title: "按钮示例",
-            icon: BorderOutlined
-          }
-        }
       ]
     },
     {
