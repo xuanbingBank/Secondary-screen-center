@@ -213,6 +213,32 @@ onMounted(() => {
   min-height: 0;
 }
 
+/* 自定义滚动条样式 */
+.menu-wrapper::-webkit-scrollbar {
+  width: 6px;  /* 竖向滚动条宽度 */
+}
+
+.menu-wrapper::-webkit-scrollbar-thumb {
+  background-color: rgba(0, 0, 0, 0.05);  /* 滚动条颜色设置得更淡 */
+  border-radius: 4px;
+  transition: background-color 0.3s ease;
+}
+
+/* 鼠标悬停时滚动条样式 */
+.menu-wrapper:hover::-webkit-scrollbar-thumb {
+  background-color: rgba(0, 0, 0, 0.2);  /* 悬停时加深颜色 */
+}
+
+/* 滚动条轨道样式 */
+.menu-wrapper::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+/* 确保菜单项不会被滚动条遮挡 */
+:deep(.ant-menu) {
+  padding-right: 1px;  /* 为滚动条预留空间 */
+}
+
 /* 中间折叠按钮样式 */
 .collapse-trigger {
   position: absolute;
