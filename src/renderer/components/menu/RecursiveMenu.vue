@@ -1,21 +1,26 @@
 <template>
   <template v-if="menuInfo.children?.length">
-    <a-sub-menu :key="String(menuInfo.name)">
+    <a-sub-menu :key="menuInfo.name?.toString()">
       <template #icon>
-        <component :is="menuInfo.meta?.icon" v-if="menuInfo.meta?.icon" />
+        <component 
+          :is="menuInfo.meta?.icon" 
+          v-if="menuInfo.meta?.icon" 
+        />
       </template>
       <template #title>{{ menuInfo.meta?.title }}</template>
-      <recursive-menu
-        v-for="child in menuInfo.children"
-        :key="String(child.name)"
-        :menu-info="child"
-      />
+      <template v-for="child in menuInfo.children" :key="child.name?.toString()">
+        <recursive-menu :menu-info="child" />
+      </template>
     </a-sub-menu>
   </template>
+
   <template v-else>
-    <a-menu-item :key="String(menuInfo.name)">
+    <a-menu-item :key="menuInfo.name?.toString()">
       <template #icon>
-        <component :is="menuInfo.meta?.icon" v-if="menuInfo.meta?.icon" />
+        <component 
+          :is="menuInfo.meta?.icon" 
+          v-if="menuInfo.meta?.icon" 
+        />
       </template>
       {{ menuInfo.meta?.title }}
     </a-menu-item>
@@ -28,4 +33,7 @@ import type { RouteRecordRaw } from 'vue-router';
 defineProps<{
   menuInfo: RouteRecordRaw
 }>();
-</script> 
+</script>
+
+<style scoped>
+</style>
