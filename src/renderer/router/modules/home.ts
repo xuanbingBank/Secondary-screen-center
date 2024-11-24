@@ -20,6 +20,14 @@ export const homeRoute: RouteRecordRaw = {
         icon: HomeOutlined,
         closable: false
       }
+    },
+    {
+      path: "software",
+      name: "home-software",
+      component: () => import("../../views/home/software.vue"),
+      meta: {
+        title: "软件库",
+      }
     }
   ]
 }; 
